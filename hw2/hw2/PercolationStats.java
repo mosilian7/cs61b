@@ -29,27 +29,28 @@ public class PercolationStats {
         return StdStats.stddev(xT);
     }
     public double confidenceLow(){
-        return (mean() - 1.96 * stddev()/Math.sqrt(T));
+        return (mean() - 1.96 * stddev() / Math.sqrt(T));
     }
     public double confidenceHigh(){
-        return (mean() + 1.96 * stddev()/Math.sqrt(T));
+        return (mean() + 1.96 * stddev() / Math.sqrt(T));
     }
     private int oneStep() {
         Percolation p = pf.make(N);
         while (true) {
-            int position = StdRandom.uniform(N*N);
-            int row = position/N;
-            int col = position%N;
+            int position = StdRandom.uniform(N * N);
+            int row = position / N;
+            int col = position % N;
             p.open(row,col);
-            if (p.percolates())
+            if (p.percolates()) {
                 return p.numberOfOpenSites();
+            }
         }
     }
     private void doStat() {
         xT = new double[T];
 
-        for (int i=0;i<T;i+=1) {
-            xT[i] = (double) oneStep()/(double) (N*N);
+        for (int i = 0;i < T;i += 1) {
+            xT[i] = (double) oneStep() / (double) (N*N);
         }
         xTInit = true;
     }
