@@ -2,21 +2,30 @@ package hw2;
 import edu.princeton.cs.algs4.StdStats;
 import edu.princeton.cs.algs4.StdRandom;
 public class PercolationStats {
-    PercolationFactory pf;
-    int N;
-    int T;
-    double[] xT;
+    private final PercolationFactory pf;
+    private final int N;
+    private final int T;
+    private double[] xT;
+    private boolean xTInit = false;
 
     public PercolationStats(int N, int T, PercolationFactory pf) {
+        if (N <= 0 || T <= 0) {
+            throw (new IllegalArgumentException("fadafada"));
+        }
         this.N = N;
         this.T = T;
         this.pf = pf;
-        xT = new double[T];
     }
     public double mean(){
+        if (!xTInit) {
+            doStat();
+        }
         return StdStats.mean(xT);
     }
     public double stddev() {
+        if (!xTInit) {
+            doStat();
+        }
         return StdStats.stddev(xT);
     }
     public double confidenceLow(){
@@ -36,20 +45,13 @@ public class PercolationStats {
                 return p.numberOfOpenSites();
         }
     }
-    public void doStat() {
+    private void doStat() {
+        xT = new double[T];
+
         for (int i=0;i<T;i+=1) {
             xT[i] = (double) oneStep()/(double) (N*N);
         }
+        xTInit = true;
     }
-    public static void main(String[] args) {
-        int N = Integer.valueOf(args[0]);
-        int T = Integer.valueOf(args[1]);
-        PercolationFactory pf = new PercolationFactory();
-        PercolationStats p = new PercolationStats(N,T,pf);
-        p.doStat();
-        System.out.println("mean = "+p.mean());
-        System.out.println("stddev = "+p.stddev());
-        System.out.println("95% confidence interval = ["+p.confidenceLow() + ", "
-                +p.confidenceHigh()+"]");
-    }
+
 }

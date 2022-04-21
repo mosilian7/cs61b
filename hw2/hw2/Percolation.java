@@ -1,20 +1,21 @@
 package hw2;
-import java.util.Objects;
+
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
-import java.util.HashSet;
-import java.util.TreeSet;
+
 
 public class Percolation {
     private final int N;
-    private boolean[] opened;
-    private int OpenedSize;
+    private final boolean[] opened;
+    private int openedSize;
 
-    private WeightedQuickUnionUF WQU;
-    private WeightedQuickUnionUF WQU2;
+    private final WeightedQuickUnionUF WQU;
+    private final WeightedQuickUnionUF WQU2;
 
     public Percolation(int N) {
+
         this.N = N;
         WQU = new WeightedQuickUnionUF(N*N+2);
+        WQU2 = new WeightedQuickUnionUF(N*N+1);
         opened = new boolean[N*N];
         for (int i=0;i<N*N;i+=1) {
             opened[i] = false;
@@ -45,14 +46,13 @@ public class Percolation {
         opened[position]=true;
         unionBorder(position);
         unionNeighbor(position);
-        OpenedSize += 1;
+        openedSize += 1;
     }
 
     private void unionBorder(int position) {
         if (position<N) {
             WQU.union(position, N * N);
-            if (WQU2 != null)
-                WQU2.union(position, N * N);
+            WQU2.union(position, N * N);
         }
         if (position>=N*(N-1))
             WQU.union(position,N*N+1);
@@ -65,10 +65,11 @@ public class Percolation {
                 if (position % N == 0 && i == -1) continue;
                 if (opened[position + i]) {
                     WQU.union(position, position + i);
-                    if (WQU2 != null)
-                        WQU2.union(position, position + i);
+                    WQU2.union(position, position + i);
                 }
-            } catch (ArrayIndexOutOfBoundsException x) {}
+            } catch (ArrayIndexOutOfBoundsException x) {
+                continue;
+            }
         }
     }
 
@@ -93,16 +94,17 @@ public class Percolation {
     }
 
     private boolean isFull(int position) {
-        if (WQU2 == null)
-            WQU2 = new WeightedQuickUnionUF(N*N+1);
         return WQU2.find(position) == WQU2.find(N*N);
     }
 
     public int numberOfOpenSites() {
-        return OpenedSize;
+        return openedSize;
     }
 
     public boolean percolates() {
         return WQU.find(N*N+1) == WQU.find(N*N);
+    }
+    public static void main(String[] args) {
+        //Testing
     }
 }
