@@ -16,7 +16,7 @@ public class PercolationStats {
         this.T = T;
         this.pf = pf;
     }
-    public double mean(){
+    public double mean() {
         if (!xTInit) {
             doStat();
         }
@@ -28,10 +28,10 @@ public class PercolationStats {
         }
         return StdStats.stddev(xT);
     }
-    public double confidenceLow(){
+    public double confidenceLow() {
         return (mean() - 1.96 * stddev() / Math.sqrt(T));
     }
-    public double confidenceHigh(){
+    public double confidenceHigh() {
         return (mean() + 1.96 * stddev() / Math.sqrt(T));
     }
     private int oneStep() {
@@ -49,8 +49,8 @@ public class PercolationStats {
     private void doStat() {
         xT = new double[T];
 
-        for (int i = 0;i < T;i += 1) {
-            xT[i] = (double) oneStep() / (double) (N*N);
+        for (int i = 0; i < T; i += 1) {
+            xT[i] = (double) oneStep() / (double) (N * N);
         }
         xTInit = true;
     }
