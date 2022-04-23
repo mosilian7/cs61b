@@ -1,7 +1,9 @@
 package lab9;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  *  A hash table-backed Map implementation. Provides amortized constant time
@@ -9,7 +11,7 @@ import java.util.Set;
  *
  *  @author Your name here
  */
-public class MyHashMap<K, V> implements Map61B<K, V> {
+public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K> {
 
     private static final int DEFAULT_SIZE = 16;
     private static final double MAX_LF = 0.75;
@@ -23,6 +25,11 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     public MyHashMap() {
         buckets = new ArrayMap[DEFAULT_SIZE];
+        this.clear();
+    }
+
+    private MyHashMap(int bucketSize) {
+        buckets = new ArrayMap[bucketSize];
         this.clear();
     }
 
@@ -53,21 +60,36 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      */
     @Override
     public V get(K key) {
-        throw new UnsupportedOperationException();
+        int index = hash(key);
+        return buckets[index].get(key);
     }
 
     /* Associates the specified value with the specified key in this map. */
     @Override
     public void put(K key, V value) {
-        throw new UnsupportedOperationException();
+        int index = hash(key);
+        if (buckets[index].get(key) == null) {
+            size += 1;
+        }
+        buckets[index].put(key,value);
+        resize();
     }
 
     /* Returns the number of key-value mappings in this map. */
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        return size;
     }
 
+    private void resize() {
+        if (loadFactor()>MAX_LF) {
+            MyHashMap<K,V> update = new MyHashMap<>(2*buckets.length);
+            for (K key:this) {
+                update.put(key,this.get(key));
+            }
+            this.buckets = update.buckets;
+        }
+    }
     //////////////// EVERYTHING BELOW THIS LINE IS OPTIONAL ////////////////
 
     /* Returns a Set view of the keys contained in this map. */
@@ -94,6 +116,35 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     @Override
     public Iterator<K> iterator() {
-        throw new UnsupportedOperationException();
+        return new keyIterator();
+    }
+
+    private class keyIterator implements Iterator<K>{
+        private Iterator<ArrayMap<K, V>> bigIterator;
+        private Iterator<K> smallIterator;
+        public keyIterator() {
+            bigIterator = Arrays.stream(buckets).iterator();
+        }
+        public boolean hasNext() {
+            return (bigIterator.hasNext()) || (smallIterator.hasNext());
+        }
+        public K next() {
+            if (smallIterator == null || !smallIterator.hasNext()) {
+                smallIterator = bigIterator.next().iterator();
+                return next();
+            }
+            return smallIterator.next();
+        }
+    }
+
+    public static void main(String[] args) {
+        MyHashMap<String, Integer> m = new MyHashMap<>();
+        for (int i = 0; i < 5; i++) {
+            m.put("hi" + i, 1 + i);
+            m.get("hi"+i);
+        }
+        for (String key:m) {
+            System.out.println(key);
+        }
     }
 }
