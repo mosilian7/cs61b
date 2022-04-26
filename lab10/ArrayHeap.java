@@ -86,9 +86,9 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     private int min(int index1, int index2) {
         Node node1 = getNode(index1);
         Node node2 = getNode(index2);
-        if (node1 == null) {
+        if (node1 == null || index1 > size) {
             return index2;
-        } else if (node2 == null) {
+        } else if (node2 == null || index2 > size) {
             return index1;
         } else if (node1.myPriority < node2.myPriority) {
             return index1;
@@ -170,6 +170,9 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     @Override
     public T removeMin() {
+        if (size == 0) {
+            return null;
+        }
         T out = contents[1].myItem;
         swap(1,size);
         contents[size] = null;
