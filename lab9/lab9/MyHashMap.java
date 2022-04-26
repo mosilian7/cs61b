@@ -3,7 +3,6 @@ package lab9;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.HashSet;
 
 /**
  *  A hash table-backed Map implementation. Provides amortized constant time
