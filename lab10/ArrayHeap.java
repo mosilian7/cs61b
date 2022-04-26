@@ -125,7 +125,12 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         if (leftChild > size) {
             return;
         }
-        int smallChild = min(leftChild,rightChild);
+        int smallChild;
+        if (leftChild == size) {
+            smallChild = leftChild;
+        } else {
+            smallChild = min(leftChild,rightChild);
+        }
         if (priority(index) <= priority(smallChild)) {
             return;
         }
