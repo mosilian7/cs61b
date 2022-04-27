@@ -7,10 +7,11 @@ import java.util.ArrayList;
 
 public class Solver {
     private MinPQ<SearchNode> pq = new MinPQ<>();
-    private HashSet<WorldState> marked = new HashSet<>();
     private int moves;
     private Iterable<WorldState> solution;
     private HashMap<WorldState,Integer> cacheHeuristics = new HashMap<>();
+
+    protected int enqueued;
 
 
     private class SearchNode implements Comparable<SearchNode>{
@@ -60,7 +61,7 @@ public class Solver {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            if (this.content ==((SearchNode) o).content) {
+            if (this.content.equals(((SearchNode) o).content)) {
                 return true;
             } else {
                 return false;
@@ -80,27 +81,25 @@ public class Solver {
 
 
     public Solver(WorldState initial) {
+        enqueued = 0;
         pq.insert(new SearchNode(initial,0,null));
 
         while (!pq.isEmpty()) {
-            SearchNode activate = pq.min();
+            SearchNode activate = pq.delMin();
             if (activate.content.isGoal()) {
                 moves = activate.movesFromInit;
                 solution = activate.pathToInit();
                 return;
             }
-            if (marked.contains(activate.content)) {
-                pq.delMin();
-                continue;
-            }
             for (WorldState w : activate.content.neighbors()) {
-                if (marked.contains(w)) {
+                SearchNode s = new SearchNode(w,activate.movesFromInit+1,activate);
+                if (s.equals(activate.parent)) {
                     continue;
                 }
-                pq.insert(new SearchNode(w,activate.movesFromInit+1,activate));
+                pq.insert(s);
+                enqueued += 1;
             }
-            marked.add(activate.content);
-            pq.delMin();
+
         }
 
         throw (new IllegalArgumentException("Path do not exist!"));
