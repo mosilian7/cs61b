@@ -9,8 +9,6 @@ public class Solver {
     private Iterable<WorldState> solution;
     private HashMap<WorldState,Integer> cacheHeuristics = new HashMap<>();
 
-    protected int enqueued;
-
     private class SearchNode implements Comparable<SearchNode>{
         protected WorldState content;
         protected int movesFromInit;
@@ -69,7 +67,6 @@ public class Solver {
 
 
     public Solver(WorldState initial) {
-        enqueued = 0;
         MinPQ<SearchNode> pq = new MinPQ<>();
         pq.insert(new SearchNode(initial,0,null));
 
@@ -86,7 +83,6 @@ public class Solver {
                     continue;
                 }
                 pq.insert(s);
-                enqueued += 1;
             }
         }
 
@@ -101,12 +97,4 @@ public class Solver {
         return solution;
     }
 
-    public static void main(String[] args) {
-        Board b = TestSolver.readBoard("input/puzzle4x4-24.txt");
-        Solver s = new Solver(b);
-        for (WorldState w: s.solution()) {
-            System.out.println((Board) w);
-            System.out.println("manhattan: " + ((Board) w).manhattan());
-        }
-    }
 }

@@ -17,6 +17,5 @@ public class WordPuzzleSolver {
         for (WorldState ws : solver.solution()) {
             StdOut.println(ws);
         }
-        System.out.println(solver.enqueued);
     }
 }

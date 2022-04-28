@@ -78,11 +78,11 @@ public class CommonBugDetector {
 
         // s.moves() should be 5
         System.out.println("s.moves() should be 5, and your s.moves() is: " + s.moves());
-        System.out.println("number of enqueued: " + s.enqueued);
+
 
         AlphabetEasyPuzzle aep = new AlphabetEasyPuzzle('a');
         Solver s3 = new Solver(aep);
-        System.out.println("number of enqueued: " + s3.enqueued);
+
         // if you print out the total number of items enqueued by s3
         // it should be approximately 25, not approximately 50.
     }
