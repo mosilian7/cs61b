@@ -3,6 +3,7 @@ package hw4.puzzle;
 import edu.princeton.cs.algs4.MinPQ;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 
 public class Solver {
@@ -12,10 +13,15 @@ public class Solver {
 
     public Solver(WorldState initial) {
         MinPQ<SearchNode> pq = new MinPQ<>();
+        HashSet<SearchNode> done = new HashSet<>();
         pq.insert(new SearchNode(initial, 0, null));
 
         while (!pq.isEmpty()) {
             SearchNode activate = pq.delMin();
+            if (done.contains(activate)) {
+                continue;
+            }
+            done.add(activate);
             if (activate.content.isGoal()) {
                 moves = activate.movesFromInit;
                 solution = activate.pathToInit();
