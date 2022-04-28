@@ -2,17 +2,14 @@ package hw4.puzzle;
 import edu.princeton.cs.algs4.MinPQ;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.ArrayList;
 
 public class Solver {
-    private MinPQ<SearchNode> pq = new MinPQ<>();
     private int moves;
     private Iterable<WorldState> solution;
     private HashMap<WorldState,Integer> cacheHeuristics = new HashMap<>();
 
     protected int enqueued;
-
 
     private class SearchNode implements Comparable<SearchNode>{
         protected WorldState content;
@@ -31,11 +28,6 @@ public class Solver {
                 heuristics = content.estimatedDistanceToGoal();
                 cacheHeuristics.put(content, heuristics);
             }
-
-        }
-
-        protected void setMovesFromInit(int m) {
-            movesFromInit = m;
         }
 
         private void pathToInitHelper(SearchNode s) {
@@ -61,11 +53,7 @@ public class Solver {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            if (this.content.equals(((SearchNode) o).content)) {
-                return true;
-            } else {
-                return false;
-            }
+            return this.content.equals(((SearchNode) o).content);
         }
 
         @Override
@@ -82,6 +70,7 @@ public class Solver {
 
     public Solver(WorldState initial) {
         enqueued = 0;
+        MinPQ<SearchNode> pq = new MinPQ<>();
         pq.insert(new SearchNode(initial,0,null));
 
         while (!pq.isEmpty()) {
@@ -99,7 +88,6 @@ public class Solver {
                 pq.insert(s);
                 enqueued += 1;
             }
-
         }
 
         throw (new IllegalArgumentException("Path do not exist!"));
@@ -111,5 +99,14 @@ public class Solver {
 
     public Iterable<WorldState> solution() {
         return solution;
+    }
+
+    public static void main(String[] args) {
+        Board b = TestSolver.readBoard("input/puzzle4x4-24.txt");
+        Solver s = new Solver(b);
+        for (WorldState w: s.solution()) {
+            System.out.println((Board) w);
+            System.out.println("manhattan: " + ((Board) w).manhattan());
+        }
     }
 }
