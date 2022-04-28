@@ -1,15 +1,47 @@
 package hw4.puzzle;
+
 import edu.princeton.cs.algs4.MinPQ;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Solver {
-    private int moves;
-    private Iterable<WorldState> solution;
-    private HashMap<WorldState,Integer> cacheHeuristics = new HashMap<>();
+    private final int moves;
+    private final Iterable<WorldState> solution;
+    private final HashMap<WorldState, Integer> cacheHeuristics = new HashMap<>();
 
-    private class SearchNode implements Comparable<SearchNode>{
+    public Solver(WorldState initial) {
+        MinPQ<SearchNode> pq = new MinPQ<>();
+        pq.insert(new SearchNode(initial, 0, null));
+
+        while (!pq.isEmpty()) {
+            SearchNode activate = pq.delMin();
+            if (activate.content.isGoal()) {
+                moves = activate.movesFromInit;
+                solution = activate.pathToInit();
+                return;
+            }
+            for (WorldState w : activate.content.neighbors()) {
+                SearchNode s = new SearchNode(w, activate.movesFromInit + 1, activate);
+                if (s.equals(activate.parent)) {
+                    continue;
+                }
+                pq.insert(s);
+            }
+        }
+
+        throw (new IllegalArgumentException("Path do not exist!"));
+    }
+
+    public int moves() {
+        return moves;
+    }
+
+    public Iterable<WorldState> solution() {
+        return solution;
+    }
+
+    private class SearchNode implements Comparable<SearchNode> {
         protected WorldState content;
         protected int movesFromInit;
         protected SearchNode parent;
@@ -63,38 +95,6 @@ public class Solver {
         public int compareTo(SearchNode other) {
             return this.movesFromInit + this.heuristics - other.movesFromInit - other.heuristics;
         }
-    }
-
-
-    public Solver(WorldState initial) {
-        MinPQ<SearchNode> pq = new MinPQ<>();
-        pq.insert(new SearchNode(initial,0,null));
-
-        while (!pq.isEmpty()) {
-            SearchNode activate = pq.delMin();
-            if (activate.content.isGoal()) {
-                moves = activate.movesFromInit;
-                solution = activate.pathToInit();
-                return;
-            }
-            for (WorldState w : activate.content.neighbors()) {
-                SearchNode s = new SearchNode(w,activate.movesFromInit+1,activate);
-                if (s.equals(activate.parent)) {
-                    continue;
-                }
-                pq.insert(s);
-            }
-        }
-
-        throw (new IllegalArgumentException("Path do not exist!"));
-    }
-
-    public int moves() {
-        return moves;
-    }
-
-    public Iterable<WorldState> solution() {
-        return solution;
     }
 
 }

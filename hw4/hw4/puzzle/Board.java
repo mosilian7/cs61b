@@ -3,7 +3,6 @@ package hw4.puzzle;
 import java.util.ArrayList;
 
 public class Board implements WorldState {
-    private final int[][] goal = new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
     private final String estimation;
     private final int[][] tiles;
     private final int N;
@@ -72,16 +71,25 @@ public class Board implements WorldState {
         return out;
     }
 
+    private int hammingToGoal(int i, int j) {
+        int target = tiles[i][j];
+        if (target == 0) {
+            return 0;
+        }
+        int targetRow = (target - 1) / N;
+        int targetCol = (target - 1) % N;
+        if (targetRow == i && targetCol == j) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
     public int hamming() {
         int out = 0;
         for (int i = 0; i < N; i += 1) {
             for (int j = 0; j < N; j += 1) {
-                if (tiles[i][j] == 0) {
-                    continue;
-                }
-                if (tiles[i][j] != goal[i][j]) {
-                    out += 1;
-                }
+                out += hammingToGoal(i, j);
             }
         }
         return out;
@@ -159,7 +167,6 @@ public class Board implements WorldState {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        int N = size();
         s.append(N + "\n");
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
