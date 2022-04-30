@@ -27,6 +27,7 @@ public class MazeBreadthFirstPaths extends MazeExplorer {
         target = m.xyTo1D(targetX,targetY);
         marked[source] = true;
         distTo[source] = 0;
+        edgeTo[source] = 0;
     }
 
     /** Conducts a breadth first search of the maze starting at the source. */
