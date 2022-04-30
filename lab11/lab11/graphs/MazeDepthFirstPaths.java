@@ -3,7 +3,8 @@ package lab11.graphs;
 /**
  *  @author Josh Hug
  */
-public class MazeDepthFirstPaths extends MazeExplorer {
+public class
+MazeDepthFirstPaths extends MazeExplorer {
     /* Inherits public fields:
     public int[] distTo;
     public int[] edgeTo;

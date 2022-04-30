@@ -13,15 +13,15 @@ public class Solver {
 
     public Solver(WorldState initial) {
         MinPQ<SearchNode> pq = new MinPQ<>();
-        HashSet<SearchNode> done = new HashSet<>();
+        HashSet<WorldState> done = new HashSet<>();
         pq.insert(new SearchNode(initial, 0, null));
 
         while (!pq.isEmpty()) {
             SearchNode activate = pq.delMin();
-            if (done.contains(activate)) {
+            if (done.contains(activate.content)) {
                 continue;
             }
-            done.add(activate);
+            done.add(activate.content);
             if (activate.content.isGoal()) {
                 moves = activate.movesFromInit;
                 solution = activate.pathToInit();
