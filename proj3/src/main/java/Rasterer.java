@@ -53,22 +53,17 @@ public class Rasterer {
         return disPerPix;
     }
 
-    /*
+
     private int depth() {
         double disPerPix = disPerPix();
         if (disPerPix >= d0_disPerPix) {
-            System.out.println("here");
             return 0;
         }
         int depth = (int) Math.ceil(Math.log(d0_disPerPix/disPerPix) / Math.log(2));
-        if (depth <= 7) {
-            System.out.println("or here");
-            return depth;
-        } else {
-            return 7;
-        }
-    }*/
+        return Math.min(depth, 7);
+    }
 
+    /*
     private int depth() {
         double disPerPix = disPerPix();
         if (disPerPix >= d0_disPerPix) {
@@ -86,7 +81,7 @@ public class Rasterer {
             depth += 1;
         }
         return depth;
-    }
+    }*/
 
     private double tileWidth(int depth) {
         return (d0_lrlon - d0_ullon) / Math.pow(2,depth);
@@ -177,6 +172,8 @@ public class Rasterer {
      *                    forget to set this to true on success! <br>
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
+        System.out.println("");
+        System.out.println("-----------------------params--------------------------");
         System.out.println(params);
 
         parseParams(params);
@@ -191,6 +188,8 @@ public class Rasterer {
 
         String[][] render_grid = generate_render_grid(d, ulx, uly, lrx, lry);
 
+        boolean query_success = (render_grid.length != 0);
+
         double raster_ul_lon = tileUllon(d, ulx, uly);
         double raster_ul_lat = tileUllat(d, ulx, uly);
         double raster_lr_lon = tileUllon(d, lrx + 1, lry + 1);
@@ -203,8 +202,10 @@ public class Rasterer {
         results.put("raster_lr_lon", raster_lr_lon);
         results.put("raster_lr_lat", raster_lr_lat);
         results.put("depth", d);
-        results.put("query_success", true);
+        results.put("query_success", query_success);
+        System.out.println("-----------------------results-------------------------");
         System.out.println(results);
+        System.out.println("---------------------render_grid-----------------------");
         System.out.println(gridToString(render_grid));
         return results;
     }
