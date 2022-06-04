@@ -6,6 +6,8 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.util.*;
+
 import java.util.ArrayList;
 
 /**
@@ -20,6 +22,11 @@ import java.util.ArrayList;
 public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
+    protected HashMap<Long, ArrayList<Long>> NodeAdjs = new HashMap<>();
+    protected HashMap<Long, NodeInfo> NodeInfos = new HashMap<>();
+    protected HashMap<String, Long> NameToId = new HashMap<>();
+    protected HashMap<Long, WayInfo> WayInfos = new HashMap<>();
+    protected HashMap<Long, Long> NodeToWay = new HashMap<>();
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -42,6 +49,138 @@ public class GraphDB {
         clean();
     }
 
+    protected static class NodeInfo {
+        public double lat;
+        public double lon;
+        public String name;
+
+        public NodeInfo(double lat, double lon) {
+            this.lat = lat;
+            this.lon = lon;
+            this.name = "unknown place";
+        }
+    }
+
+    protected static class WayInfo {
+        public ArrayList<Long> nodeIds;
+        public String name;
+
+        public WayInfo(ArrayList<Long> nodeIds) {
+            this.nodeIds = nodeIds;
+            this.name = "unknown road";
+        }
+    }
+
+    /*protected static class way {
+        public ArrayList<Long> nodeIds;
+        public String name;
+
+        public way(ArrayList<Long> nodeIds) {
+            this.nodeIds = nodeIds;
+            this.name = "";
+        }
+
+        public way(ArrayList<Long> nodeIds, String name) {
+            this.nodeIds = nodeIds;
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            for (int i=0; i < nodeIds.size(); i += 1) {
+                try {
+                    if (!Objects.equals(nodeIds.get(i), ((way) o).nodeIds.get(i))) {
+                        return false;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int out = 0;
+            for (long id: nodeIds) {
+                out = out * 31;
+                out += id;
+            }
+            return out;
+        }
+    }*/
+
+    protected class SearchNode implements Comparable<SearchNode>{
+        public long nodeId;
+        public double disFromStart;
+        public SearchNode parent;
+        public double heuristics;
+        public ArrayList<Long> pathToStart = new ArrayList<>();
+
+        public SearchNode(long id, double d, SearchNode p, HashMap<Long, Double> cacheHeuristics,
+                          GraphDB gdb, long destination) {
+            nodeId = id;
+            disFromStart = d;
+            parent = p;
+            if (cacheHeuristics.containsKey(id)) {
+                heuristics = cacheHeuristics.get(id);
+            } else {
+                heuristics = gdb.distance(id, destination);
+            }
+        }
+
+        private void pathToStartHelper(SearchNode s) {
+            if (s.parent == null) {
+                pathToStart.add(s.nodeId);
+                return;
+            }
+            pathToStartHelper(s.parent);
+            pathToStart.add(s.nodeId);
+        }
+
+        protected ArrayList<Long> pathToInit() {
+            pathToStart.clear();
+            pathToStartHelper(this);
+            return pathToStart;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            return (this.nodeId == ((SearchNode) o).nodeId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(nodeId);
+        }
+
+        @Override
+        public int compareTo(SearchNode other) {
+            double difference = this.disFromStart + this.heuristics - other.disFromStart - other.heuristics;
+            if (difference > 0) {
+                return 1;
+            } else if (difference == 0) {
+                return 0;
+            } else if (difference < 0) {
+                return -1;
+            }
+            return 0;
+        }
+    }
     /**
      * Helper to process strings into their "cleaned" form, ignoring punctuation and capitalization.
      * @param s Input string.
@@ -56,8 +195,64 @@ public class GraphDB {
      *  While this does not guarantee that any two nodes in the remaining graph are connected,
      *  we can reasonably assume this since typically roads are connected.
      */
+
+
     private void clean() {
         // TODO: Your code here.
+        ArrayList<Long> toBeRemoved = new ArrayList<>();
+        for (long id: NodeAdjs.keySet()) {
+            if (NodeAdjs.get(id).size() == 0) {
+                toBeRemoved.add(id);
+            }
+        }
+        for (long id: toBeRemoved) {
+            NodeAdjs.remove(id);
+            NodeInfos.remove(id);
+        }
+    }
+
+    protected void addWayName(long wayId, String name) {
+        WayInfos.get(wayId).name = name;
+    }
+
+    protected void connectAll(ArrayList<Long> nodeIds, long wayId) {
+        long lastId = -1;
+        for (long id: nodeIds) {
+            if (lastId != -1) {
+                connect(id, lastId);
+            }
+            lastId = id;
+            NodeToWay.put(id, wayId);
+        }
+        WayInfos.put(wayId, new WayInfo(nodeIds));
+    }
+
+    protected void addName(long nodeId, String name) {
+        NodeInfos.get(nodeId).name = name;
+        NameToId.put(name, nodeId);
+    }
+
+    protected void addNode(long nodeId, NodeInfo nodeInfo) {
+        NodeAdjs.put(nodeId, new ArrayList<>());
+        NodeInfos.put(nodeId, nodeInfo);
+    }
+
+    protected void addNode(long nodeId, double lat, double lon) {
+        NodeInfo nodeInfo = new NodeInfo(lat, lon);
+        NodeAdjs.put(nodeId, new ArrayList<>());
+        NodeInfos.put(nodeId, nodeInfo);
+    }
+
+    protected void addNode(long nodeId, double lat, double lon, String name) {
+        NodeInfo nodeInfo = new NodeInfo(lat, lon);
+        nodeInfo.name = name;
+        NodeAdjs.put(nodeId, new ArrayList<>());
+        NodeInfos.put(nodeId, nodeInfo);
+    }
+
+    protected void connect(Long n1, Long n2) {
+        NodeAdjs.get(n1).add(n2);
+        NodeAdjs.get(n2).add(n1);
     }
 
     /**
@@ -66,7 +261,7 @@ public class GraphDB {
      */
     Iterable<Long> vertices() {
         //YOUR CODE HERE, this currently returns only an empty list.
-        return new ArrayList<Long>();
+        return NodeInfos.keySet();
     }
 
     /**
@@ -75,7 +270,7 @@ public class GraphDB {
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-        return null;
+        return NodeAdjs.get(v);
     }
 
     /**
@@ -136,7 +331,16 @@ public class GraphDB {
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        return 0;
+        double minDis = Double.MAX_VALUE;
+        long minId = -1;
+        for (long id: NodeInfos.keySet()) {
+            double dis = distance(lon, lat, lon(id), lat(id));
+            if (dis < minDis) {
+                minDis = dis;
+                minId = id;
+            }
+        }
+        return minId;
     }
 
     /**
@@ -145,7 +349,7 @@ public class GraphDB {
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        return 0;
+        return NodeInfos.get(v).lon;
     }
 
     /**
@@ -154,6 +358,6 @@ public class GraphDB {
      * @return The latitude of the vertex.
      */
     double lat(long v) {
-        return 0;
+        return NodeInfos.get(v).lat;
     }
 }

@@ -1,5 +1,4 @@
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +11,10 @@ import java.util.regex.Pattern;
  * down to the priority you use to order your vertices.
  */
 public class Router {
+
+
+
+
     /**
      * Return a List of longs representing the shortest path from the node
      * closest to a start location and the node closest to the destination
@@ -25,7 +28,67 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
-        return null; // FIXME
+        ArrayList<Long> solution = new ArrayList<>();
+        HashMap<Long, Double> cacheHeuristics = new HashMap<>();
+        long start = g.closest(stlon, stlat);
+        long destination = g.closest(destlon, destlat);
+        double dis;
+
+        PriorityQueue<GraphDB.SearchNode> pq = new PriorityQueue<>();
+        HashSet<Long> done = new HashSet<>();
+
+        pq.add(g.new SearchNode(start, 0.0, null, cacheHeuristics, g, destination));
+
+        while (!pq.isEmpty()) {
+            GraphDB.SearchNode activate = pq.poll();
+            if (done.contains(activate.nodeId)) {
+                continue;
+            }
+            done.add(activate.nodeId);
+            if (activate.nodeId == destination) {
+                dis = activate.disFromStart;
+                solution = activate.pathToInit();
+                return solution;
+            }
+            Iterable<Long> neighbors = g.adjacent(activate.nodeId);
+            for (long id : neighbors) {
+                double d = g.distance(id, activate.nodeId);
+                GraphDB.SearchNode s = g.new SearchNode(id, activate.disFromStart + d, activate,
+                                                        cacheHeuristics, g, destination);
+                if (s.equals(activate.parent)) {
+                    continue;
+                }
+                pq.add(s);
+            }
+        }
+        return solution;
+    }
+
+
+
+    private static int relBearingToDirection(double rb) {
+        if (rb > -15 && rb < 15) {
+            return 1;
+        }
+        if (rb > 15 && rb < 30) {
+            return 2;
+        }
+        if (rb > 30 && rb < 100) {
+            return 5;
+        }
+        if (rb > 100) {
+            return 6;
+        }
+        if (rb < -15 && rb > -30) {
+            return 3;
+        }
+        if (rb < -30 &&rb > -100) {
+            return 4;
+        }
+        if (rb < -100) {
+            return 7;
+        }
+        return -1;
     }
 
     /**
@@ -37,7 +100,51 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+        ArrayList<NavigationDirection> out = new ArrayList<>();
+        long lastWayId = -1;
+        long lastNodeId = -1;
+        double lastBearingAngle = 0.0;
+        double BearingAngle = 0.0;
+        int direction = 0;
+        double distance = 0.0;
+        String lastWayName = "";
+
+
+        for (long nodeId: route) {
+            if (lastNodeId != -1) {
+                BearingAngle = g.bearing(lastNodeId, nodeId);
+            }
+
+            long wayId = g.NodeToWay.get(nodeId);
+            String wayName = g.WayInfos.get(wayId).name;
+            if (wayId != lastWayId && !lastWayName.equals(wayName)) {
+                if (lastNodeId != -1) {
+                    out.add(NavigationDirection.fromString(String.format("%s on %s and continue for %.3f miles.",
+                            NavigationDirection.DIRECTIONS[direction], lastWayName, distance)));
+
+                    double relBearing = BearingAngle - lastBearingAngle;
+                    direction = relBearingToDirection(relBearing);
+                    distance = 0.0;
+                }
+            }
+
+            if (lastNodeId != -1) {
+                distance += g.distance(lastNodeId, nodeId);
+            }
+
+            lastWayName = wayName;
+            lastNodeId = nodeId;
+            lastBearingAngle = BearingAngle;
+            lastWayId = wayId;
+        }
+
+        long finalNodeId = route.get(route.size() - 1);
+        long finalWayId = g.NodeToWay.get(finalNodeId);
+        String wayName = g.WayInfos.get(finalWayId).name;
+        out.add(NavigationDirection.fromString(String.format("%s on %s and continue for %.3f miles.",
+                NavigationDirection.DIRECTIONS[direction], wayName, distance)));
+        System.out.println("add one after for-loop");
+        return out;
     }
 
 
