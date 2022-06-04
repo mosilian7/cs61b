@@ -13,15 +13,14 @@ import java.util.regex.Pattern;
 public class Router {
 
 
-
-
     /**
      * Return a List of longs representing the shortest path from the node
      * closest to a start location and the node closest to the destination
      * location.
-     * @param g The graph to use.
-     * @param stlon The longitude of the start location.
-     * @param stlat The latitude of the start location.
+     *
+     * @param g       The graph to use.
+     * @param stlon   The longitude of the start location.
+     * @param stlat   The latitude of the start location.
      * @param destlon The longitude of the destination location.
      * @param destlat The latitude of the destination location.
      * @return A list of node id's in the order visited on the shortest path.
@@ -54,7 +53,7 @@ public class Router {
             for (long id : neighbors) {
                 double d = g.distance(id, activate.nodeId);
                 GraphDB.SearchNode s = g.new SearchNode(id, activate.disFromStart + d, activate,
-                                                        cacheHeuristics, g, destination);
+                        cacheHeuristics, g, destination);
                 if (s.equals(activate.parent)) {
                     continue;
                 }
@@ -63,7 +62,6 @@ public class Router {
         }
         return solution;
     }
-
 
 
     private static int relBearingToDirection(double rb) {
@@ -82,7 +80,7 @@ public class Router {
         if (rb < -15 && rb > -30) {
             return 3;
         }
-        if (rb < -30 &&rb > -100) {
+        if (rb < -30 && rb > -100) {
             return 4;
         }
         if (rb < -100) {
@@ -93,7 +91,8 @@ public class Router {
 
     /**
      * Create the list of directions corresponding to a route on the graph.
-     * @param g The graph to use.
+     *
+     * @param g     The graph to use.
      * @param route The route to translate into directions. Each element
      *              corresponds to a node from the graph in the route.
      * @return A list of NavigatiionDirection objects corresponding to the input
@@ -110,7 +109,7 @@ public class Router {
         String lastWayName = "";
 
 
-        for (long nodeId: route) {
+        for (long nodeId : route) {
             if (lastNodeId != -1) {
                 BearingAngle = g.bearing(lastNodeId, nodeId);
             }
@@ -154,7 +153,9 @@ public class Router {
      */
     public static class NavigationDirection {
 
-        /** Integer constants representing directions. */
+        /**
+         * Integer constants representing directions.
+         */
         public static final int START = 0;
         public static final int STRAIGHT = 1;
         public static final int SLIGHT_LEFT = 2;
@@ -164,15 +165,21 @@ public class Router {
         public static final int SHARP_LEFT = 6;
         public static final int SHARP_RIGHT = 7;
 
-        /** Number of directions supported. */
+        /**
+         * Number of directions supported.
+         */
         public static final int NUM_DIRECTIONS = 8;
 
-        /** A mapping of integer values to directions.*/
+        /**
+         * A mapping of integer values to directions.
+         */
         public static final String[] DIRECTIONS = new String[NUM_DIRECTIONS];
 
-        /** Default name for an unknown way. */
+        /**
+         * Default name for an unknown way.
+         */
         public static final String UNKNOWN_ROAD = "unknown road";
-        
+
         /** Static initializer. */
         static {
             DIRECTIONS[START] = "Start";
@@ -185,11 +192,17 @@ public class Router {
             DIRECTIONS[SHARP_RIGHT] = "Sharp right";
         }
 
-        /** The direction a given NavigationDirection represents.*/
+        /**
+         * The direction a given NavigationDirection represents.
+         */
         int direction;
-        /** The name of the way I represent. */
+        /**
+         * The name of the way I represent.
+         */
         String way;
-        /** The distance along this way I represent. */
+        /**
+         * The distance along this way I represent.
+         */
         double distance;
 
         /**
@@ -201,14 +214,10 @@ public class Router {
             this.distance = 0.0;
         }
 
-        public String toString() {
-            return String.format("%s on %s and continue for %.3f miles.",
-                    DIRECTIONS[direction], way, distance);
-        }
-
         /**
          * Takes the string representation of a navigation direction and converts it into
          * a Navigation Direction object.
+         *
          * @param dirAsString The string representation of the NavigationDirection.
          * @return A NavigationDirection object representing the input string.
          */
@@ -252,12 +261,17 @@ public class Router {
             }
         }
 
+        public String toString() {
+            return String.format("%s on %s and continue for %.3f miles.",
+                    DIRECTIONS[direction], way, distance);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof NavigationDirection) {
                 return direction == ((NavigationDirection) o).direction
-                    && way.equals(((NavigationDirection) o).way)
-                    && distance == ((NavigationDirection) o).distance;
+                        && way.equals(((NavigationDirection) o).way)
+                        && distance == ((NavigationDirection) o).distance;
             }
             return false;
         }

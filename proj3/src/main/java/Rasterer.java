@@ -8,17 +8,17 @@ import java.util.Map;
  * not draw the output correctly.
  */
 public class Rasterer {
+    private final double d0_lrlat = 37.82280243352756;
+    private final double d0_lrlon = -122.2119140625;
+    private final double d0_ullat = 37.892195547244356;
+    private final double d0_ullon = -122.2998046875;
+    private final double d0_disPerPix = (d0_lrlon - d0_ullon) / 256;
     private double h;
     private double w;
     private double lrlat;
     private double lrlon;
     private double ullat;
     private double ullon;
-    private final double d0_lrlat = 37.82280243352756;
-    private final double d0_lrlon = -122.2119140625;
-    private final double d0_ullat = 37.892195547244356;
-    private final double d0_ullon = -122.2998046875;
-    private final double d0_disPerPix = (d0_lrlon - d0_ullon) / 256;
 
     public Rasterer() {
         // YOUR CODE HERE
@@ -59,7 +59,7 @@ public class Rasterer {
         if (disPerPix >= d0_disPerPix) {
             return 0;
         }
-        int depth = (int) Math.ceil(Math.log(d0_disPerPix/disPerPix) / Math.log(2));
+        int depth = (int) Math.ceil(Math.log(d0_disPerPix / disPerPix) / Math.log(2));
         return Math.min(depth, 7);
     }
 
@@ -84,11 +84,11 @@ public class Rasterer {
     }*/
 
     private double tileWidth(int depth) {
-        return (d0_lrlon - d0_ullon) / Math.pow(2,depth);
+        return (d0_lrlon - d0_ullon) / Math.pow(2, depth);
     }
 
     private double tileHeight(int depth) {
-        return (d0_ullat - d0_lrlat) / Math.pow(2,depth);
+        return (d0_ullat - d0_lrlat) / Math.pow(2, depth);
     }
 
     private double tileUllon(int depth, int x, int y) {
@@ -121,7 +121,7 @@ public class Rasterer {
     private String[][] generate_render_grid(int depth, int ulx, int uly, int lrx, int lry) {
         String[][] out = new String[lry + 1 - uly][lrx + 1 - ulx];
         for (int i = 0; i < lry + 1 - uly; i += 1) {
-            for (int j=0; j < lrx + 1 - ulx; j += 1) {
+            for (int j = 0; j < lrx + 1 - ulx; j += 1) {
                 out[i][j] = String.format("d%1$d_x%2$d_y%3$d.png",
                         depth, ulx + j, uly + i);
             }
@@ -133,7 +133,7 @@ public class Rasterer {
         String out = "[";
         for (String[] row : render_grid) {
             out += "[";
-            for (String element: row) {
+            for (String element : row) {
                 out += element + ", ";
             }
             out += "]";
@@ -146,21 +146,20 @@ public class Rasterer {
     /**
      * Takes a user query and finds the grid of images that best matches the query. These
      * images will be combined into one big image (rastered) by the front end. <br>
-     *
-     *     The grid of images must obey the following properties, where image in the
-     *     grid is referred to as a "tile".
-     *     <ul>
-     *         <li>The tiles collected must cover the most longitudinal distance per pixel
-     *         (LonDPP) possible, while still covering less than or equal to the amount of
-     *         longitudinal distance per pixel in the query box for the user viewport size. </li>
-     *         <li>Contains all tiles that intersect the query bounding box that fulfill the
-     *         above condition.</li>
-     *         <li>The tiles must be arranged in-order to reconstruct the full image.</li>
-     *     </ul>
+     * <p>
+     * The grid of images must obey the following properties, where image in the
+     * grid is referred to as a "tile".
+     * <ul>
+     *     <li>The tiles collected must cover the most longitudinal distance per pixel
+     *     (LonDPP) possible, while still covering less than or equal to the amount of
+     *     longitudinal distance per pixel in the query box for the user viewport size. </li>
+     *     <li>Contains all tiles that intersect the query bounding box that fulfill the
+     *     above condition.</li>
+     *     <li>The tiles must be arranged in-order to reconstruct the full image.</li>
+     * </ul>
      *
      * @param params Map of the HTTP GET request's query parameters - the query box and
      *               the user viewport width and height.
-     *
      * @return A map of results for the front end as specified: <br>
      * "render_grid"   : String[][], the files to display. <br>
      * "raster_ul_lon" : Number, the bounding upper left longitude of the rastered image. <br>
@@ -169,7 +168,7 @@ public class Rasterer {
      * "raster_lr_lat" : Number, the bounding lower right latitude of the rastered image. <br>
      * "depth"         : Number, the depth of the nodes of the rastered image <br>
      * "query_success" : Boolean, whether the query was able to successfully complete; don't
-     *                    forget to set this to true on success! <br>
+     * forget to set this to true on success! <br>
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
         //System.out.println("");
@@ -183,8 +182,10 @@ public class Rasterer {
 
         int[] ulxy = lonlat_to_ulxy(d, ullon, ullat);
         int[] lrxy = lonlat_to_lrxy(d, lrlon, lrlat);
-        int ulx = ulxy[0]; int uly = ulxy[1];
-        int lrx = lrxy[0]; int lry = lrxy[1];
+        int ulx = ulxy[0];
+        int uly = ulxy[1];
+        int lrx = lrxy[0];
+        int lry = lrxy[1];
 
         String[][] render_grid = generate_render_grid(d, ulx, uly, lrx, lry);
 
