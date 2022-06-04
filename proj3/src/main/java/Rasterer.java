@@ -172,9 +172,9 @@ public class Rasterer {
      *                    forget to set this to true on success! <br>
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
-        System.out.println("");
-        System.out.println("-----------------------params--------------------------");
-        System.out.println(params);
+        //System.out.println("");
+        //System.out.println("-----------------------params--------------------------");
+        //System.out.println(params);
 
         parseParams(params);
         int d = depth();
@@ -203,10 +203,10 @@ public class Rasterer {
         results.put("raster_lr_lat", raster_lr_lat);
         results.put("depth", d);
         results.put("query_success", query_success);
-        System.out.println("-----------------------results-------------------------");
-        System.out.println(results);
-        System.out.println("---------------------render_grid-----------------------");
-        System.out.println(gridToString(render_grid));
+        //System.out.println("-----------------------results-------------------------");
+        //System.out.println(results);
+        //System.out.println("---------------------render_grid-----------------------");
+        //System.out.println(gridToString(render_grid));
         return results;
     }
 

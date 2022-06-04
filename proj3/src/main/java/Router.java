@@ -143,7 +143,7 @@ public class Router {
         String wayName = g.WayInfos.get(finalWayId).name;
         out.add(NavigationDirection.fromString(String.format("%s on %s and continue for %.3f miles.",
                 NavigationDirection.DIRECTIONS[direction], wayName, distance)));
-        System.out.println("add one after for-loop");
+        //System.out.println("add one after for-loop");
         return out;
     }
 
