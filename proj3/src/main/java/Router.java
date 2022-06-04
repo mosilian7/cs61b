@@ -65,6 +65,13 @@ public class Router {
 
 
     private static int relBearingToDirection(double rb) {
+        while (rb > 180) {
+            rb -= 360;
+        }
+        while (rb < -180) {
+            rb += 360;
+        }
+
         if (rb > -15 && rb < 15) {
             return 1;
         }
@@ -89,6 +96,26 @@ public class Router {
         return -1;
     }
 
+    public static HashSet<String> wayIdToName(ArrayList<Long> wayIds, GraphDB g) {
+        HashSet<String> out = new HashSet<>();
+        for (long id: wayIds) {
+            out.add(g.WayInfos.get(id).name);
+        }
+        return out;
+    }
+
+    public static String sharedWayName(ArrayList<Long> n1, ArrayList<Long> n2, GraphDB g) {
+        HashSet<String> wn1 = wayIdToName(n1, g);
+        HashSet<String> wn2 = wayIdToName(n2, g);
+        for (String name1 : wn1) {
+            for (String name2 : wn2) {
+                if (name1.equals(name2)) {
+                    return name1;
+                }
+            }
+        }
+        return "None";
+    }
     /**
      * Create the list of directions corresponding to a route on the graph.
      *
@@ -100,28 +127,29 @@ public class Router {
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
         ArrayList<NavigationDirection> out = new ArrayList<>();
-        long lastWayId = -1;
         long lastNodeId = -1;
         double lastBearingAngle = 0.0;
         double BearingAngle = 0.0;
         int direction = 0;
         double distance = 0.0;
         String lastWayName = "";
-
+        String wayName = "";
 
         for (long nodeId : route) {
+            System.out.println(g.NodeToWay.get(nodeId));
+            System.out.println(wayIdToName(g.NodeToWay.get(nodeId),g));
             if (lastNodeId != -1) {
                 BearingAngle = g.bearing(lastNodeId, nodeId);
+                wayName = sharedWayName(g.NodeToWay.get(nodeId), g.NodeToWay.get(lastNodeId), g);
             }
 
-            long wayId = g.NodeToWay.get(nodeId);
-            String wayName = g.WayInfos.get(wayId).name;
-            if (wayId != lastWayId && !lastWayName.equals(wayName)) {
-                if (lastNodeId != -1) {
+            if (!wayName.equals(lastWayName)) {
+                if (lastNodeId != -1 && !lastWayName.equals("")) {
+
                     out.add(NavigationDirection.fromString(String.format("%s on %s and continue for %.3f miles.",
                             NavigationDirection.DIRECTIONS[direction], lastWayName, distance)));
 
-                    double relBearing = BearingAngle - lastBearingAngle;
+                    double relBearing = lastBearingAngle - BearingAngle;
                     direction = relBearingToDirection(relBearing);
                     distance = 0.0;
                 }
@@ -134,14 +162,15 @@ public class Router {
             lastWayName = wayName;
             lastNodeId = nodeId;
             lastBearingAngle = BearingAngle;
-            lastWayId = wayId;
         }
-
-        long finalNodeId = route.get(route.size() - 1);
-        long finalWayId = g.NodeToWay.get(finalNodeId);
-        String wayName = g.WayInfos.get(finalWayId).name;
-        out.add(NavigationDirection.fromString(String.format("%s on %s and continue for %.3f miles.",
-                NavigationDirection.DIRECTIONS[direction], wayName, distance)));
+        try {
+            long finalNodeId = route.get(route.size() - 2);
+            wayName = sharedWayName(g.NodeToWay.get(finalNodeId), g.NodeToWay.get(lastNodeId), g);
+            out.add(NavigationDirection.fromString(String.format("%s on %s and continue for %.3f miles.",
+                    NavigationDirection.DIRECTIONS[direction], wayName, distance)));
+        } catch (IndexOutOfBoundsException e) {
+            return new ArrayList<>();
+        }
         //System.out.println("add one after for-loop");
         return out;
     }

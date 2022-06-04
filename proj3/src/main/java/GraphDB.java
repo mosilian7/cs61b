@@ -28,7 +28,7 @@ public class GraphDB {
     protected HashMap<Long, NodeInfo> NodeInfos = new HashMap<>();
     protected HashMap<String, Long> NameToId = new HashMap<>();
     protected HashMap<Long, WayInfo> WayInfos = new HashMap<>();
-    protected HashMap<Long, Long> NodeToWay = new HashMap<>();
+    protected HashMap<Long, ArrayList<Long>> NodeToWay = new HashMap<>();
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -165,7 +165,14 @@ public class GraphDB {
                 connect(id, lastId);
             }
             lastId = id;
-            NodeToWay.put(id, wayId);
+
+            if (NodeToWay.get(id) == null) {
+                ArrayList<Long> wayList = new ArrayList<>();
+                wayList.add(wayId);
+                NodeToWay.put(id, wayList);
+            } else {
+                NodeToWay.get(id).add(wayId);
+            }
         }
         WayInfos.put(wayId, new WayInfo(nodeIds));
     }
