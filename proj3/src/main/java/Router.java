@@ -98,7 +98,7 @@ public class Router {
 
     public static HashSet<String> wayIdToName(ArrayList<Long> wayIds, GraphDB g) {
         HashSet<String> out = new HashSet<>();
-        for (long id: wayIds) {
+        for (long id : wayIds) {
             out.add(g.WayInfos.get(id).name);
         }
         return out;
@@ -116,6 +116,7 @@ public class Router {
         }
         return "None";
     }
+
     /**
      * Create the list of directions corresponding to a route on the graph.
      *
@@ -136,8 +137,8 @@ public class Router {
         String wayName = "";
 
         for (long nodeId : route) {
-            System.out.println(g.NodeToWay.get(nodeId));
-            System.out.println(wayIdToName(g.NodeToWay.get(nodeId),g));
+            //System.out.println(g.NodeToWay.get(nodeId));
+            //System.out.println(wayIdToName(g.NodeToWay.get(nodeId),g));
             if (lastNodeId != -1) {
                 BearingAngle = g.bearing(lastNodeId, nodeId);
                 wayName = sharedWayName(g.NodeToWay.get(nodeId), g.NodeToWay.get(lastNodeId), g);
