@@ -42,7 +42,7 @@ public class GraphBuildingHandler extends DefaultHandler {
     private long lastNodeId = -1;
     private ArrayList<Long> toBeConnected = new ArrayList<>();
     private long lastWayId = -1;
-    private String lastWayName = "";
+    private String lastWayName = "unknown road";
     private boolean rememberWayName = false;
 
     /**
@@ -155,7 +155,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             }
             toBeConnected = new ArrayList<>();
             lastWayId = -1;
-            lastWayName = "";
+            lastWayName = "unknown road";
             rememberWayName = false;
             /* We are done looking at a way. (We finished looking at the nodes, speeds, etc...)*/
             /* Hint1: If you have stored the possible connections for this way, here's your

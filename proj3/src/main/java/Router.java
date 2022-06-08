@@ -136,9 +136,10 @@ public class Router {
         String lastWayName = "";
         String wayName = "";
 
+        System.out.println("----------------------------------------------------");
         for (long nodeId : route) {
-            //System.out.println(g.NodeToWay.get(nodeId));
-            //System.out.println(wayIdToName(g.NodeToWay.get(nodeId),g));
+            System.out.println(g.NodeToWay.get(nodeId));
+            System.out.println(wayIdToName(g.NodeToWay.get(nodeId),g));
             if (lastNodeId != -1) {
                 BearingAngle = g.bearing(lastNodeId, nodeId);
                 wayName = sharedWayName(g.NodeToWay.get(nodeId), g.NodeToWay.get(lastNodeId), g);
