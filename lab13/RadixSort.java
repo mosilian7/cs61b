@@ -21,12 +21,11 @@ public class RadixSort {
             maxLen = maxLen > s.length() ? maxLen : s.length();
         }
 
-        String[] out = padding(asciis, maxLen);
+        String[] out = asciis;
 
         for (int i = maxLen - 1; i >= 0; i -= 1) {
             out = sortHelperLSD(out, i);
         }
-        unpadding(out, maxLen);
         return out;
     }
 
@@ -70,7 +69,8 @@ public class RadixSort {
         // gather all the counts for each value
         int[] counts = new int[256];
         for (String s : asciis) {
-            counts[Integer.valueOf(s.charAt(index))]++;
+            int i = index >= s.length() ? 0 : s.charAt(index);
+            counts[i]++;
         }
         int[] starts = new int[256];
         int pos = 0;
@@ -82,7 +82,7 @@ public class RadixSort {
         String[] sorted = new String[asciis.length];
 
         for (int i = 0; i < asciis.length; i += 1) {
-            int item = Integer.valueOf(asciis[i].charAt(index));
+            int item = index >= asciis[i].length() ? 0 : asciis[i].charAt(index);
             int place = starts[item];
             sorted[place] = asciis[i];
             starts[item] += 1;
