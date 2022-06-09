@@ -21,25 +21,45 @@ public class RadixSort {
             maxLen = maxLen > s.length() ? maxLen : s.length();
         }
 
-        String[] padded = padding(asciis, maxLen);
+        String[] out = padding(asciis, maxLen);
+
         for (int i = maxLen - 1; i >= 0; i -= 1) {
-            padded = sortHelperLSD(padded, i);
+            out = sortHelperLSD(out, i);
         }
-        return padded;
+        unpadding(out, maxLen);
+        return out;
     }
 
     private static String[] padding(String[] inputs, int maxLen) {
         String[] out = new String[inputs.length];
         for (int i = 0; i < inputs.length; i += 1) {
-            String zeros = "";
+            StringBuilder sb = new StringBuilder();
             for (int j = 0; j < maxLen - inputs[i].length(); j += 1) {
-                zeros += "0";
+                sb.append((char) 0);
             }
-            out[i] = zeros + inputs[i];
+            out[i] = inputs[i] + sb.toString();
         }
         return out;
     }
 
+    private static String unpadString(String padded, int maxLen) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i <  maxLen; i += 1) {
+            char c = padded.charAt(i);
+            if ((int)  c == 0) {
+                break;
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static void unpadding(String[] padded, int maxLen) {
+        for (int i = 0; i < padded.length; i += 1) {
+            padded[i] = unpadString(padded[i], maxLen);
+        }
+    }
     /**
      * LSD helper method that performs a destructive counting sort the array of
      * Strings based off characters at a specific index.
@@ -48,11 +68,11 @@ public class RadixSort {
      */
     private static String[] sortHelperLSD(String[] asciis, int index) {
         // gather all the counts for each value
-        int[] counts = new int[10];
+        int[] counts = new int[256];
         for (String s : asciis) {
-            counts[Integer.valueOf(s.charAt(index) - '0')]++;
+            counts[Integer.valueOf(s.charAt(index))]++;
         }
-        int[] starts = new int[10];
+        int[] starts = new int[256];
         int pos = 0;
         for (int i = 0; i < starts.length; i += 1) {
             starts[i] = pos;
@@ -62,7 +82,7 @@ public class RadixSort {
         String[] sorted = new String[asciis.length];
 
         for (int i = 0; i < asciis.length; i += 1) {
-            int item = Integer.valueOf(asciis[i].charAt(index) - '0');
+            int item = Integer.valueOf(asciis[i].charAt(index));
             int place = starts[item];
             sorted[place] = asciis[i];
             starts[item] += 1;
@@ -87,7 +107,7 @@ public class RadixSort {
     }
 
     public static void main(String[] args) {
-        String[] s = new String[]{"134", "233", "612", "890", "111", "23", "456"};
+        String[] s = new String[]{"Alice", "Akko", "Diana", "Honoka", "Umi", "Kotori", "Rin", "Kayo"};
         String[] sorted = sort(s);
         for (String num: sorted) {
             System.out.println(num);
