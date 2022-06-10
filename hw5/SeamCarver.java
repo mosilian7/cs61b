@@ -3,10 +3,10 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.*;
 
 public class SeamCarver {
-    Picture picture;
+    private Picture picture;
 
     public SeamCarver(Picture picture) {
-        this.picture = picture;
+        this.picture = new Picture(picture);
     }
 
     private static int sqr(int x) {
@@ -24,34 +24,10 @@ public class SeamCarver {
         return sqr(c1red - c2red) + sqr(c1green - c2green) + sqr(c1blue - c2blue);
     }
 
-    public static void main(String[] args) {
-        Picture p = new Picture(3, 4);
-        int[][][] exampleArray = {{{255, 101, 51}, {255, 101, 153}, {255, 101, 255}},
-                {{255, 153, 51}, {255, 153, 153}, {255, 153, 255}},
-                {{255, 203, 51}, {255, 204, 153}, {255, 205, 255}},
-                {{255, 255, 51}, {255, 255, 153}, {255, 255, 255}}};
-        double[][] exampleEnergy = {{20808.0, 52020.0, 20808.0},
-                {20808.0, 52225.0, 21220.0},
-                {20809.0, 52024.0, 20809.0},
-                {20808.0, 52225.0, 21220.0}};
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 4; j++) {
-                int[] colorVals = exampleArray[j][i];
-                p.set(i, j, new Color(colorVals[0], colorVals[1], colorVals[2]));
-            }
-        }
 
-        SeamCarver sc = new SeamCarver(p);
-
-        for (int i : sc.findVerticalSeam()) {
-            //System.out.println(i);
-        }
-
-        //System.out.println(sc.validSeam(new int[]{4,2,3,4}));
-    }
 
     public Picture picture() {
-        return picture;
+        return new Picture(picture);
     }
 
     public int width() {
