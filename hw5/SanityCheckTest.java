@@ -41,6 +41,9 @@ public class SanityCheckTest {
 
         int[] seam = sc.findVerticalSeam();
         int[] expected = {3, 4, 3, 2, 2};
+        for (int i: seam) {
+            System.out.println(i);
+        }
         assertArrayEquals(expected, seam);
     }
 
